@@ -15,6 +15,8 @@ Tried to stay kinda close to preact-router. Try throwing something like this in 
 <script src="https://unpkg.com/preact@10.11.3/dist/preact.umd.js"></script>
 <script src="https://unpkg.com/preact@10.11.3/hooks/dist/hooks.umd.js"></script>
 <script src="https://unpkg.com/htm@3.1.1/preact/standalone.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ruffin--/preact-router-for-htm/HtmRouter.min.js"></script>
+
 <script>
     window.render = window.preact.render;
     window.useState = window.preactHooks.useState;
