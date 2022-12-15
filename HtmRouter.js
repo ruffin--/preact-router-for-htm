@@ -1,12 +1,35 @@
+/*global useState */
+// Note that this means you have to push useState into global scope
+// in your code. See https://github.com/ruffin--/preact-router-for-htm for more.
 (function () {
+    function isRegExp(obj) {
+        return Object.prototype.toString.call(obj) === '[object RegExp]';
+    }
+
+    function endsWithViaRegExp(str, re) {
+        var reString = re.source;
+        re = reString.endsWith('$') ? re : new RegExp(reString + '$', re.flags);
+        return re.test(str);
+    }
+
+    function endsWithDeluxe(str, stringOrRegExp) {
+        return isRegExp(stringOrRegExp)
+            ? endsWithViaRegExp(str, stringOrRegExp)
+            : str.endsWith(stringOrRegExp);
+    }
+
     window.HtmRouter = function (props) {
         // =============================================
         // jive stolen from
         // https://github.com/preactjs/preact-router
         // =============================================
         function prevent(e) {
-            if (e.stopImmediatePropagation) e.stopImmediatePropagation();
-            if (e.stopPropagation) e.stopPropagation();
+            if (e.stopImmediatePropagation) {
+                e.stopImmediatePropagation();
+            }
+            if (e.stopPropagation) {
+                e.stopPropagation();
+            }
             e.preventDefault();
             return false;
         }
@@ -14,14 +37,18 @@
         // Handles both delegated and direct-bound link clicks
         function delegateLinkHandler(e) {
             // ignore events the browser takes care of already:
-            if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.button) return;
+            if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.button) {
+                return;
+            }
 
             let t = e.target;
             do {
-                if (t.localName === "a" && t.getAttribute("href")) {
-                    if (t.hasAttribute("data-native") || t.hasAttribute("native")) return;
+                if (t.localName === 'a' && t.getAttribute('href')) {
+                    if (t.hasAttribute('data-native') || t.hasAttribute('native')) {
+                        return;
+                    }
 
-                    var newUrl = t.getAttribute("href");
+                    var newUrl = t.getAttribute('href');
 
                     // if link is handled by the router, prevent browser defaults
                     // Some of this stolen stuff was edited. -RUF
@@ -46,17 +73,19 @@
         let eventListenersInitialized = false;
 
         function initEventListeners() {
-            if (eventListenersInitialized) return;
+            if (eventListenersInitialized) {
+                return;
+            }
             eventListenersInitialized = true;
 
-            addEventListener("click", delegateLinkHandler);
+            addEventListener('click', delegateLinkHandler);
         }
         // =============================================
         // eo stolen jive
         // =============================================
 
         function routerHandlesUrl(url) {
-            return children.find((x) => x.props.path && url.endsWith(x.props.path));
+            return children.find((x) => x.props.path && endsWithDeluxe(url, x.props.path));
         }
 
         const [url, setUrl] = useState(window.location.href);
@@ -68,11 +97,9 @@
 
         var match =
             (haveChildren &&
-                (props.children.find((x) => x.props.path && url.endsWith(x.props.path)) ||
-                    props.children.find((x) => x.props.default))) ||
-            html`<h3>no match</h3>`;
+                (routerHandlesUrl(url) || props.children.find((x) => x.props.default))) ||
+            undefined;
 
         return match;
     };
 })();
-
