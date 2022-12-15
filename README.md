@@ -37,7 +37,7 @@ Tried to stay kinda close to preact-router. Try throwing something like this in 
 <body>
     <a href="./anotherUrl/">go to url within app</a><br />
     <a href="#hash">add hash to url</a><br />
-    <a href="#another">add hash to url</a><br />
+    <a href="#another">add another hash to url</a><br />
     <a href="http://www.apple.com">go to apple.com</a><br />
     <div id="root-element"></div>
 </body>

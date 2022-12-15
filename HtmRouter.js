@@ -66,10 +66,11 @@
         var haveChildren = Array.isArray(props.children);
         var children = haveChildren ? props.children : [];
 
-        var match = haveChildren
-            ? props.children.find((x) => x.props.path && url.endsWith(x.props.path)) ||
-              props.children.find((x) => x.props.default)
-            : html`<h3>no route match</h3>`;
+        var match =
+            (haveChildren &&
+                (props.children.find((x) => x.props.path && url.endsWith(x.props.path)) ||
+                    props.children.find((x) => x.props.default))) ||
+            html`<h3>no match</h3>`;
 
         return match;
     };
