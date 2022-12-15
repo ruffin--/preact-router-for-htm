@@ -1,0 +1,48 @@
+<html>
+    <head>
+        <title>HtmRouter Tester</title>
+
+        <script src="https://unpkg.com/preact@10.11.3/dist/preact.umd.js"></script>
+        <script src="https://unpkg.com/preact@10.11.3/hooks/dist/hooks.umd.js"></script>
+        <script src="https://unpkg.com/htm@3.1.1/preact/standalone.umd.js"></script>
+        <!-- <script src="https://cdn.jsdelivr.net/gh/ruffin--/preact-router-for-htm/HtmRouter.min.js"></script> -->
+        <script src="./HtmRouter.js"></script>
+
+        <script>
+            window.render = window.preact.render;
+            window.useState = window.preactHooks.useState;
+            window.html = window.htmPreact.html;
+
+            function MyComponent(props) {
+                return html`<h3>#${props.displayText}#</h3>`;
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                render(
+                    html`<${HtmRouter}>
+                        <${MyComponent} displayText="default" default />
+                        <${MyComponent} displayText="simple preact" path="simplePreact/" />
+                        <${MyComponent} displayText="another url" path="anotherUrl/" />
+                        <${MyComponent} displayText="hash" path="#hash" />
+                        <${MyComponent} displayText="another hash" path="#another" />
+                        <${MyComponent} displayText="user display" path=${/users\/[0-9]+/} />
+                    </HtmRouter>`,
+                    document.getElementById('root-element')
+                );
+            });
+        </script>
+    </head>
+    <body>
+        <a href="/anotherUrl/">go to url within app</a><br />
+        <a href="/users/2">go to users/2</a><br />
+        <a href="/users/234">go to users/234</a><br />
+        <a href="/users/2/spam">go to users/2/spam which shouldn't be found</a><br />
+        <a href="#hash">add hash to url</a><br />
+        <a href="/#another">add another hash to ROOT url</a><br />
+
+        <!-- as in ensure this url ISN'T captured by the router -->
+        <a href="http://www.apple.com">go to apple.com</a><br />
+
+        <div id="root-element"></div>
+    </body>
+</html>
