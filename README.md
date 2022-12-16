@@ -50,6 +50,12 @@ document.addEventListener('DOMContentLoaded', function () {
 </body>
 ```
 
+**NEW:** You can programmatically route things with the `HtmRouter.route` method. 
+
+**NOTE:** Naving to urls of `'#'` will be ignored so that we can fake `return false` on link `onclick` handlers, as that's [apparently a thing in Reactland](https://stackoverflow.com/a/31203399/1028230).
+
+`<a href="#" onclick="HtmRouter.route('users/2')">programmatic nav to users/2</a>`
+
 Code is really quite short and self-explanatory. Stop reading this and open it up.
 
 Note that it is meant to be run in (and only in) a [non-transpiled Preact & HTM environment](https://myfreakinname.blogspot.com/search/label/preact).

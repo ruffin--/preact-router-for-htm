@@ -19,6 +19,7 @@
 
     function HtmRouter(props) {
         const [url, setUrl] = useState(window.location.href);
+        var idPropName = props.idPropName || 'id';
 
         var routerRoot = props.root || '';
         if (routerRoot && routerRoot.endsWith('/')) {
@@ -118,9 +119,28 @@
                 children.find((x) => x.props.path && endsWithDeluxe(testUrl, x.props.path)) ||
                 children.find((x) => x.props.default);
 
+            if (match) {
+                // We'll do a poor man's version of pushing an ending id into props.
+                if (testUrl.indexOf('/') > -1 && testUrl.length > 1) {
+                    var possibleIdValue = testUrl.substring(testUrl.lastIndexOf('/') + 1);
+
+                    // Check for int or guid?
+                    match.props[idPropName] = possibleIdValue;
+                }
+            }
+
+            console.log('routerHandlesUrl', testUrl, match);
             return match;
         }
         // #endregion
+
+        // Okay, this feels like a giant kludge.
+        // It does mean we can't nest routers.
+        // Guess we could track multiple & hunt them all for matches by some formula.
+        window.HtmRouter.route = function (newUrl, state, title) {
+            newUrl = processNewUrl(newUrl);
+            addUrlToState(state, title, newUrl);
+        };
 
         initEventListeners();
 
