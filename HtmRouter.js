@@ -1,4 +1,3 @@
-/*global useState */
 // Note that this means you have to push useState into global scope
 // in your code. See https://github.com/ruffin--/preact-router-for-htm for more.
 (function () {
@@ -18,7 +17,36 @@
             : str.endsWith(stringOrRegExp);
     }
 
-    window.HtmRouter = function (props) {
+    function HtmRouter(props) {
+        const [url, setUrl] = useState(window.location.href);
+        var idPropName = props.idPropName || 'id';
+
+        var routerRoot = props.root || '';
+        if (routerRoot && routerRoot.endsWith('/')) {
+            routerRoot = routerRoot.substring(0, routerRoot.length - 1);
+        }
+        if (routerRoot && !routerRoot.startsWith('/')) {
+            routerRoot = '/' + routerRoot;
+        }
+
+        var haveChildren = Array.isArray(props.children);
+
+        // unfortunately if you have only one child, it's not sent to props in an array
+        var singleChild = !haveChildren && props.children.props; // duck sniff`
+        var children = haveChildren ? props.children : singleChild ? [props.children] : [];
+
+        // #region Router-scoped convenience functions
+        function processNewUrl(newUrl) {
+            var prefix = newUrl.indexOf('/') === 0 ? routerRoot : '';
+
+            return prefix + newUrl;
+        }
+
+        function addUrlToState(state, title, newUrl) {
+            setUrl(newUrl);
+            window.history.pushState(state, title || document.title, newUrl);
+        }
+
         // =============================================
         // jive stolen from
         // https://github.com/preactjs/preact-router
@@ -49,29 +77,31 @@
                     }
 
                     var newUrl = t.getAttribute('href');
+                    newUrl = processNewUrl(newUrl);
 
-                    // if link is handled by the router, prevent browser defaults
-                    // Some of this stolen stuff was edited. -RUF
-                    // Not real sure what "state" should do here
-                    // https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-                    // I mean I get it, but what would I put here?
-                    // https://stackoverflow.com/a/34178234/1028230
-                    var match = routerHandlesUrl(newUrl);
-                    if (match) {
-                        setUrl(newUrl);
-                        window.history.pushState(
-                            match.props,
-                            match.props.title || document.title,
-                            newUrl
-                        );
-                        return prevent(e);
+                    // React apparently makes it hard to pull a "return false", so
+                    // let's ignore any link that just wants to go to "#" to keep things clean.
+                    // https://stackoverflow.com/a/31203399/1028230
+                    if (newUrl === '#') {
+                        prevent(e);
+                    } else {
+                        // if link is handled by the router, prevent browser defaults
+                        // Some of this stolen stuff was edited. -RUF
+                        // Not real sure what "state" should do here
+                        // https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
+                        // I mean I get it, but what would I put here?
+                        // https://stackoverflow.com/a/34178234/1028230
+                        var match = routerHandlesUrl(newUrl);
+                        if (match) {
+                            addUrlToState(match.props, match.props.title, newUrl);
+                            return prevent(e);
+                        }
                     }
                 }
             } while ((t = t.parentNode));
         }
 
         let eventListenersInitialized = false;
-
         function initEventListeners() {
             if (eventListenersInitialized) {
                 return;
@@ -84,22 +114,41 @@
         // eo stolen jive
         // =============================================
 
-        function routerHandlesUrl(url) {
-            return children.find((x) => x.props.path && endsWithDeluxe(url, x.props.path));
-        }
+        function routerHandlesUrl(testUrl) {
+            var match =
+                children.find((x) => x.props.path && endsWithDeluxe(testUrl, x.props.path)) ||
+                children.find((x) => x.props.default);
 
-        const [url, setUrl] = useState(window.location.href);
+            if (match) {
+                // We'll do a poor man's version of pushing an ending id into props.
+                if (testUrl.indexOf('/') > -1 && testUrl.length > 1) {
+                    var possibleIdValue = testUrl.substring(testUrl.lastIndexOf('/') + 1);
+
+                    // Check for int or guid?
+                    match.props[idPropName] = possibleIdValue;
+                }
+            }
+
+            console.log('routerHandlesUrl', testUrl, match);
+            return match;
+        }
+        // #endregion
+
+        // Okay, this feels like a giant kludge.
+        // It does mean we can't nest routers.
+        // Guess we could track multiple & hunt them all for matches by some formula.
+        window.HtmRouter.route = function (newUrl, state, title) {
+            newUrl = processNewUrl(newUrl);
+            addUrlToState(state, title, newUrl);
+        };
+
         initEventListeners();
 
-        // console.log(props.children, url);
-        var haveChildren = Array.isArray(props.children);
-        var children = haveChildren ? props.children : [];
+        var match = routerHandlesUrl(url) || (console.log('no router match') && undefined);
 
-        var match =
-            (haveChildren &&
-                (routerHandlesUrl(url) || props.children.find((x) => x.props.default))) ||
-            undefined;
-
+        console.warn('router is rerendering ' + +new Date());
         return match;
-    };
+    }
+
+    window.HtmRouter = HtmRouter;
 })();

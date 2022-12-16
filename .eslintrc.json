@@ -1,0 +1,24 @@
+{
+    "parserOptions": {
+        "ecmaVersion": 6
+    },
+
+    "rules": {
+        "quotes": [2, "single", { "allowTemplateLiterals": true, "avoidEscape": true }],
+        "template-tag-spacing": ["error", "never"],
+        "no-undef": "error",
+        "no-redeclare": "error",
+        "no-shadow": "error"
+    },
+
+    "env": {
+        "es6": true,
+        "browser": true,
+        "node": false,
+        "jasmine": true // Jasmine Unit Testing Framework
+    },
+    "globals": {
+        "html": true,
+        "useState": true
+    }
+}
