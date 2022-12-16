@@ -20,9 +20,15 @@
     function HtmRouter(props) {
         const [url, setUrl] = useState(window.location.href);
 
-        // console.log(props.children, url);
         var haveChildren = Array.isArray(props.children);
-        var children = haveChildren ? props.children : [];
+        // unfortunately if you have only one child, it's not sent to props in an array
+        var singleChild = !haveChildren && props.children.props; // duck sniff`
+        var children = haveChildren ? props.children : singleChild ? [props.children] : [];
+
+        function addUrlToState(state, title, newUrl) {
+            setUrl(newUrl);
+            window.history.pushState(state, title || document.title, newUrl);
+        }
 
         // =============================================
         // jive stolen from
@@ -63,12 +69,7 @@
                     // https://stackoverflow.com/a/34178234/1028230
                     var match = routerHandlesUrl(newUrl);
                     if (match) {
-                        setUrl(newUrl);
-                        window.history.pushState(
-                            match.props,
-                            match.props.title || document.title,
-                            newUrl
-                        );
+                        addUrlToState(match.props, match.props.title, newUrl);
                         return prevent(e);
                     }
                 }
@@ -88,8 +89,8 @@
         // eo stolen jive
         // =============================================
 
-        function routerHandlesUrl(url) {
-            return children.find((x) => x.props.path && endsWithDeluxe(url, x.props.path));
+        function routerHandlesUrl(testUrl) {
+            return children.find((x) => x.props.path && endsWithDeluxe(testUrl, x.props.path));
         }
 
         initEventListeners();
@@ -100,7 +101,7 @@
             undefined;
 
         return match;
-    };
+    }
 
     window.HtmRouter = HtmRouter;
 })();
