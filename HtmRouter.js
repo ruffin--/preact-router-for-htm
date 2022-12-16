@@ -1,4 +1,3 @@
-/*global useState */
 // Note that this means you have to push useState into global scope
 // in your code. See https://github.com/ruffin--/preact-router-for-htm for more.
 (function () {
@@ -18,7 +17,13 @@
             : str.endsWith(stringOrRegExp);
     }
 
-    window.HtmRouter = function (props) {
+    function HtmRouter(props) {
+        const [url, setUrl] = useState(window.location.href);
+
+        // console.log(props.children, url);
+        var haveChildren = Array.isArray(props.children);
+        var children = haveChildren ? props.children : [];
+
         // =============================================
         // jive stolen from
         // https://github.com/preactjs/preact-router
@@ -71,7 +76,6 @@
         }
 
         let eventListenersInitialized = false;
-
         function initEventListeners() {
             if (eventListenersInitialized) {
                 return;
@@ -88,12 +92,7 @@
             return children.find((x) => x.props.path && endsWithDeluxe(url, x.props.path));
         }
 
-        const [url, setUrl] = useState(window.location.href);
         initEventListeners();
-
-        // console.log(props.children, url);
-        var haveChildren = Array.isArray(props.children);
-        var children = haveChildren ? props.children : [];
 
         var match =
             (haveChildren &&
@@ -102,4 +101,6 @@
 
         return match;
     };
+
+    window.HtmRouter = HtmRouter;
 })();
