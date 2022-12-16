@@ -5,7 +5,7 @@
         <script src="https://unpkg.com/preact@10.11.3/dist/preact.umd.js"></script>
         <script src="https://unpkg.com/preact@10.11.3/hooks/dist/hooks.umd.js"></script>
         <script src="https://unpkg.com/htm@3.1.1/preact/standalone.umd.js"></script>
-        <!-- <script src="https://cdn.jsdelivr.net/gh/ruffin--/preact-router-for-htm/HtmRouter.min.js"></script> -->
+        <!-- <script src="https://cdn.jsdelivr.net/gh/ruffin--/preact-router-for-htm@latest/HtmRouter.js"></script> -->
         <script src="./HtmRouter.js"></script>
 
         <script>
@@ -17,9 +17,11 @@
                 return html`<h3>#${props.displayText}#</h3>`;
             }
 
+            var appStartRoot = window.location.href.split('/').slice(3).join('/');
+
             document.addEventListener('DOMContentLoaded', function () {
                 render(
-                    html`<${HtmRouter}>
+                    html`<${HtmRouter} root=${appStartRoot}>
                         <${MyComponent} displayText="default" default />
                         <${MyComponent} displayText="simple preact" path="simplePreact/" />
                         <${MyComponent} displayText="another url" path="anotherUrl/" />

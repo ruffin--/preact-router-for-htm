@@ -20,10 +20,26 @@
     function HtmRouter(props) {
         const [url, setUrl] = useState(window.location.href);
 
+        var routerRoot = props.root || '';
+        if (routerRoot && routerRoot.endsWith('/')) {
+            routerRoot = routerRoot.substring(0, routerRoot.length - 1);
+        }
+        if (routerRoot && !routerRoot.startsWith('/')) {
+            routerRoot = '/' + routerRoot;
+        }
+
         var haveChildren = Array.isArray(props.children);
+
         // unfortunately if you have only one child, it's not sent to props in an array
         var singleChild = !haveChildren && props.children.props; // duck sniff`
         var children = haveChildren ? props.children : singleChild ? [props.children] : [];
+
+        // #region Router-scoped convenience functions
+        function processNewUrl(newUrl) {
+            var prefix = newUrl.indexOf('/') === 0 ? routerRoot : '';
+
+            return prefix + newUrl;
+        }
 
         function addUrlToState(state, title, newUrl) {
             setUrl(newUrl);
@@ -60,6 +76,7 @@
                     }
 
                     var newUrl = t.getAttribute('href');
+                    newUrl = processNewUrl(newUrl);
 
                     // if link is handled by the router, prevent browser defaults
                     // Some of this stolen stuff was edited. -RUF
@@ -90,16 +107,19 @@
         // =============================================
 
         function routerHandlesUrl(testUrl) {
-            return children.find((x) => x.props.path && endsWithDeluxe(testUrl, x.props.path));
+            var match =
+                children.find((x) => x.props.path && endsWithDeluxe(testUrl, x.props.path)) ||
+                children.find((x) => x.props.default);
+
+            return match;
         }
+        // #endregion
 
         initEventListeners();
 
-        var match =
-            (haveChildren &&
-                (routerHandlesUrl(url) || props.children.find((x) => x.props.default))) ||
-            undefined;
+        var match = routerHandlesUrl(url) || (console.log('no router match') && undefined);
 
+        console.warn('router is rerendering ' + +new Date());
         return match;
     }
 
