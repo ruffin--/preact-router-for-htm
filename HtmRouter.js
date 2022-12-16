@@ -78,16 +78,23 @@
                     var newUrl = t.getAttribute('href');
                     newUrl = processNewUrl(newUrl);
 
-                    // if link is handled by the router, prevent browser defaults
-                    // Some of this stolen stuff was edited. -RUF
-                    // Not real sure what "state" should do here
-                    // https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
-                    // I mean I get it, but what would I put here?
-                    // https://stackoverflow.com/a/34178234/1028230
-                    var match = routerHandlesUrl(newUrl);
-                    if (match) {
-                        addUrlToState(match.props, match.props.title, newUrl);
-                        return prevent(e);
+                    // React apparently makes it hard to pull a "return false", so
+                    // let's ignore any link that just wants to go to "#" to keep things clean.
+                    // https://stackoverflow.com/a/31203399/1028230
+                    if (newUrl === '#') {
+                        prevent(e);
+                    } else {
+                        // if link is handled by the router, prevent browser defaults
+                        // Some of this stolen stuff was edited. -RUF
+                        // Not real sure what "state" should do here
+                        // https://developer.mozilla.org/en-US/docs/Web/API/History/pushState
+                        // I mean I get it, but what would I put here?
+                        // https://stackoverflow.com/a/34178234/1028230
+                        var match = routerHandlesUrl(newUrl);
+                        if (match) {
+                            addUrlToState(match.props, match.props.title, newUrl);
+                            return prevent(e);
+                        }
                     }
                 }
             } while ((t = t.parentNode));

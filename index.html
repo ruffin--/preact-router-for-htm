@@ -2,6 +2,15 @@
     <head>
         <title>HtmRouter Tester</title>
 
+        <style>
+            a {
+                text-decoration: none;
+                color: blue;
+            }
+
+            code { background-color: lightgray;
+        </style>
+
         <script src="https://unpkg.com/preact@10.11.3/dist/preact.umd.js"></script>
         <script src="https://unpkg.com/preact@10.11.3/hooks/dist/hooks.umd.js"></script>
         <script src="https://unpkg.com/htm@3.1.1/preact/standalone.umd.js"></script>
@@ -17,7 +26,22 @@
                 return html`<h3>#${props.displayText}#</h3>`;
             }
 
-            var appStartRoot = window.location.href.split('/').slice(3).join('/');
+            function cutAtStr(haystack, needles) {
+                if (!Array.isArray(needles)) {
+                    needles = [needles];
+                }
+
+                needles.forEach((needle) => {
+                    var at = haystack.indexOf(needle);
+                    haystack = at > -1 ? haystack.substring(0, at) : haystack;
+                });
+
+                return haystack;
+            }
+
+            var href = cutAtStr(window.location.href, ['#', '?']);
+
+            var appStartRoot = href.split('/').slice(3).join('/');
 
             document.addEventListener('DOMContentLoaded', function () {
                 render(
@@ -40,6 +64,8 @@
         <a href="/users/234">go to users/234</a><br />
         <a href="/users/2/spam">go to users/2/spam which shouldn't be found</a><br />
         <a href="#hash">add hash to url</a><br />
+        <a href="#"><b>warning:</b> we ignore going to just the hash <code>#</code></a
+        ><br />
         <a href="/#another">add another hash to ROOT url</a><br />
 
         <!-- as in ensure this url ISN'T captured by the router -->
